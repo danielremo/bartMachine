@@ -111,7 +111,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 		
 		double ln_transition_ratio_grow = calcLnTransRatioGrow(T_i, T_star, grow_node);
 		double ln_likelihood_ratio_grow = calcLnLikRatioGrow(grow_node);
-		double ln_tree_structure_ratio_grow = calcLnTreeStructureRatioGrow(grow_node);
+		double ln_tree_structure_ratio_grow = calcLnTreeStructureRatioGrow(T_i, grow_node);
 		
 		if (DEBUG_MH){
 			System.out.println(gibbs_sample_num + " GROW  <<" + grow_node.stringLocation(true) + ">> ---- X_" + (grow_node.splitAttributeM) + 
@@ -144,7 +144,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 		}
 		double ln_transition_ratio_prune = calcLnTransRatioPrune(T_i, T_star, prune_node);
 		double ln_likelihood_ratio_prune = -calcLnLikRatioGrow(prune_node); //inverse of before (will speed up later)
-		double ln_tree_structure_ratio_prune = -calcLnTreeStructureRatioGrow(prune_node);
+		double ln_tree_structure_ratio_prune = calcLnTreeStructureRatioPrune(T_i, prune_node);
 		
 		if (DEBUG_MH){
 			System.out.println(gibbs_sample_num + " PRUNE <<" + prune_node.stringLocation(true) + 
@@ -240,17 +240,67 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * @return				The log of the transition ratio
 	 * @see 				Section A.1.3 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
-	protected double calcLnTreeStructureRatioGrow(bartMachineTreeNode grow_node) {
+	protected double calcLnTreeStructureRatioGrow(bartMachineTreeNode T_i, bartMachineTreeNode grow_node) {
 		int d_eta = grow_node.depth;
+		int K = T_i.numLeaves();
 		double p_adj = pAdj(grow_node);
 		int n_adj = grow_node.nAdj();
-		return Math.log(alpha) 
-				+ 2 * Math.log(1 - alpha / Math.pow(2 + d_eta, beta))
-				- Math.log(Math.pow(1 + d_eta, beta) - alpha)
-				- Math.log(p_adj) 
-				- Math.log(n_adj);
-	}	
-	
+		if (prior_name == 'a') {
+			return Math.log(alpha)
+					+ 2 * Math.log(1 - alpha / Math.pow(2 + d_eta, beta))
+					- Math.log(Math.pow(1 + d_eta, beta) - alpha)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name == 'b') {
+			return 2 * Math.log(1 - Math.pow(Gamma, -d_eta - 1))
+					- Math.log(Math.pow(Gamma, d_eta) - 1)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name == 'c') {
+			return Math.log(lam)2
+					-Math.log(4*K-2)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name == 'd') {
+			return -c
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else {
+			System.err.println("Prior not supported")
+			System.exit(0);
+			return -1;
+		}
+	}
+
+	/**
+	 * Calculates the log transition ratio for a prune step
+	 *
+	 * @param grow_node		The node that was grown in the proposal tree
+	 * @return				The log of the transition ratio
+	 * @see 				Section A.1.3 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 */
+	protected double calcLnTreeStructureRatioPrune(bartMachineTreeNode T_i, bartMachineTreeNode prune_node) {
+		int K = T_i.numLeaves();
+		double p_adj = pAdj(grow_node);
+		int n_adj = grow_node.nAdj();
+		if (prior_name == 'a' || prior_name == 'b') {
+			return -calcLnTreeStructureRatioGrow(T_i, prune_node)
+		} else if (prior_name == 'c') {
+			return Math.log(4*K-6)
+					- Math.log(lam)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name == 'd') {
+			return c
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else {
+			System.err.println("Prior not supported")
+			System.exit(0);
+			return -1;
+		}
+	}
+
 	/**
 	 * This calculates the log transition ratio for the prune step.
 	 * 

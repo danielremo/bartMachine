@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="bartMachine:jar">
+    <output-path>$PROJECT_DIR$/classes/artifacts/bartMachine_jar</output-path>
+    <root id="archive" name="bartMachine.jar">
+      <element id="module-output" name="bartMachine" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/trove-3.0.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/junit-4.10.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/commons-math-2.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

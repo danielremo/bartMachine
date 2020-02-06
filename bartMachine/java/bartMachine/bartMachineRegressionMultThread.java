@@ -24,6 +24,8 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 	protected int num_cores = 1; //default
 	/** the number of trees in this BART model on all Gibbs chains */
 	protected int num_trees = 50; //default
+	/** the prior to use */
+	protected String prior_name = "poly_splits"; //default
 	
 	/** the collection of <code>num_cores</code> BART models which will run separate Gibbs chains */
 	protected bartMachineRegression[] bart_gibbs_chain_threads;
@@ -45,6 +47,12 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 	protected Double alpha = 0.95;
 	/** A hyperparameter that controls how easy it is to grow new nodes in a tree dependent on depth which makes it more difficult as the tree gets deeper */
 	protected Double beta = 2.0;
+	/** Alternative tree prior hyperparameter to above */
+	protected double Gamma = 2.2;
+	/** Alternative tree prior hyperparameter to above */
+	protected double lam = 0.1;
+	/** Alternative tree prior hyperparameter to above */
+	protected double c = 0.5;
 	/** this controls where to set <code>hyper_sigsq_mu</code> by forcing the variance to be this number of standard deviations on the normal CDF */
 	protected Double hyper_k = 2.0;
 	/** At a fixed <code>hyper_nu</code>, this controls where to set <code>hyper_lambda</code> by forcing q proportion to be at that value in the inverse gamma CDF */
@@ -108,12 +116,16 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 		bart.setVerbose(verbose);
 		//now set specs on each of the bart models
 		bart.num_trees = num_trees;
+		bart.prior_name = prior_name;
 		bart.num_gibbs_total_iterations = total_iterations_multithreaded;
 		bart.num_gibbs_burn_in = num_gibbs_burn_in;
 		bart.sample_var_y = sample_var_y;		
 		//now some hyperparams
 		bart.setAlpha(alpha);
 		bart.setBeta(beta);
+		bart.setGamma(gamma);
+		bart.setLam(lam);
+		bart.setC(c);
 		bart.setK(hyper_k);
 		bart.setProbGrow(prob_grow);
 		bart.setProbPrune(prob_prune);
@@ -520,6 +532,8 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 	public void setNumTrees(int num_trees){
 		this.num_trees = num_trees;
 	}
+
+	public void setPriorName(char prior_name) {this.prior_name = prior_name;}
 	
 	public void setSampleVarY(double sample_var_y){
 		this.sample_var_y = sample_var_y;
@@ -531,7 +545,19 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 	
 	public void setBeta(double beta){
 		this.beta = beta;
-	}	
+	}
+
+	public void setGamma(double Gamma){
+		this.Gamma = Gamma;
+	}
+
+	public void setLam(double lam){
+		this.lam = lam;
+	}
+
+	public void setC(double c){
+		this.c = c;
+	}
 	
 	public void setK(double hyper_k) {
 		this.hyper_k = hyper_k;

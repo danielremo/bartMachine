@@ -4,10 +4,14 @@ BART_NUM_CORES_DEFAULT = 1 #Stay conservative as a default
 ##build a BART model
 build_bart_machine = function(X = NULL, y = NULL, Xy = NULL, 
 		num_trees = 50, #found many times to not get better after this value... so let it be the default, it's faster too 
+		prior_name = 'a',
 		num_burn_in = 250, 
 		num_iterations_after_burn_in = 1000, 
 		alpha = 0.95,
 		beta = 2,
+		Gamma = 2.2,
+		lam = 0.1,
+		c = 1/2,
 		k = 2,
 		q = 0.9,
 		nu = 3.0,
@@ -264,10 +268,14 @@ build_bart_machine = function(X = NULL, y = NULL, Xy = NULL,
 	#build bart to spec with what the user wants
 	.jcall(java_bart_machine, "V", "setNumCores", as.integer(num_cores)) #this must be set FIRST!!!
 	.jcall(java_bart_machine, "V", "setNumTrees", as.integer(num_trees))
+	.jcall(java_bart_machine, "V", "setPriorName", prior_name)
 	.jcall(java_bart_machine, "V", "setNumGibbsBurnIn", as.integer(num_burn_in))
 	.jcall(java_bart_machine, "V", "setNumGibbsTotalIterations", as.integer(num_gibbs))
 	.jcall(java_bart_machine, "V", "setAlpha", alpha)
 	.jcall(java_bart_machine, "V", "setBeta", beta)
+	.jcall(java_bart_machine, "V", "setGamma", Gamma)
+	.jcall(java_bart_machine, "V", "setLam", lam)
+	.jcall(java_bart_machine, "V", "setC", c)
 	.jcall(java_bart_machine, "V", "setK", k)
 	.jcall(java_bart_machine, "V", "setQ", q)
 	.jcall(java_bart_machine, "V", "setNU", nu)
@@ -355,11 +363,15 @@ build_bart_machine = function(X = NULL, y = NULL, Xy = NULL,
 			p = p,
 			num_cores = num_cores,
 			num_trees = num_trees,
+			prior_name = prior_name,
 			num_burn_in = num_burn_in,
 			num_iterations_after_burn_in = num_iterations_after_burn_in, 
 			num_gibbs = num_gibbs,
 			alpha = alpha,
 			beta = beta,
+			Gamma = gamma,
+			lam = lam,
+			c = c,
 			k = k,
 			q = q,
 			nu = nu,
@@ -474,10 +486,14 @@ bart_machine_duplicate = function(bart_machine, X = NULL, y = NULL, cov_prior_ve
 	}	
 	build_bart_machine(X, y,
 		num_trees = num_trees, #found many times to not get better after this value... so let it be the default, it's faster too 
+		prior_name = prior_name,
 		num_burn_in = bart_machine$num_burn_in, 
 		num_iterations_after_burn_in = bart_machine$num_iterations_after_burn_in, 
 		alpha = bart_machine$alpha,
 		beta = bart_machine$beta,
+		Gamma = bart_machine$Gamma,
+		lam = bart_machine$lam,
+		c = bart_machine$c,
 		k = bart_machine$k,
 		q = bart_machine$q,
 		nu = bart_machine$nu,

@@ -46,6 +46,12 @@ public abstract class bartMachine_b_hyperparams extends bartMachine_a_base imple
 	protected double alpha = 0.95;
 	/** A hyperparameter that controls how easy it is to grow new nodes in a tree dependent on depth which makes it more difficult as the tree gets deeper */
 	protected double beta = 2;
+	/** Alternative tree prior hyperparameter to above */
+	protected double Gamma = 2.2;
+	/** Alternative tree prior hyperparameter to above */
+	protected double lam = 0.1;
+	/** Alternative tree prior hyperparameter to above */
+	protected double c = 0.5;
 	/** the minimum of the response variable on its original scale */
 	protected double y_min;
 	/** the maximum of the response variable on its original scale */
@@ -224,7 +230,19 @@ public abstract class bartMachine_b_hyperparams extends bartMachine_a_base imple
 	public void setBeta(double beta){
 		this.beta = beta;
 	}
-	
+
+	public void setGamma(double Gamma){
+		this.Gamma = Gamma;
+	}
+
+	public void setLam(double lam){
+		this.lam = lam;
+	}
+
+	public void setC(double c){
+		this.c = c;
+	}
+
 	public double getHyper_mu_mu() {
 		return hyper_mu_mu;
 	}
