@@ -84,5 +84,5 @@ public abstract class bartMachine_a_base extends Classifier implements Serializa
 		this.num_trees = m;
 	}
 
-	public void setPriorName(char s) {this.prior_name = s;}
+	public void setPriorName(String s) { this.prior_name = s; }
 }

@@ -48,11 +48,11 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 	/** A hyperparameter that controls how easy it is to grow new nodes in a tree dependent on depth which makes it more difficult as the tree gets deeper */
 	protected Double beta = 2.0;
 	/** Alternative tree prior hyperparameter to above */
-	protected double Gamma = 2.2;
+	protected Double Gamma = 2.2;
 	/** Alternative tree prior hyperparameter to above */
-	protected double lam = 0.1;
+	protected Double lam = 0.1;
 	/** Alternative tree prior hyperparameter to above */
-	protected double c = 0.5;
+	protected Double c = 0.5;
 	/** this controls where to set <code>hyper_sigsq_mu</code> by forcing the variance to be this number of standard deviations on the normal CDF */
 	protected Double hyper_k = 2.0;
 	/** At a fixed <code>hyper_nu</code>, this controls where to set <code>hyper_lambda</code> by forcing q proportion to be at that value in the inverse gamma CDF */
@@ -123,7 +123,7 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 		//now some hyperparams
 		bart.setAlpha(alpha);
 		bart.setBeta(beta);
-		bart.setGamma(gamma);
+		bart.setGamma(Gamma);
 		bart.setLam(lam);
 		bart.setC(c);
 		bart.setK(hyper_k);
@@ -140,7 +140,7 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 		}
 		//do special stuff for regression model
 		if (!(bart instanceof bartMachineClassification)){
-			bart.setNu(hyper_nu);		
+			bart.setNU(hyper_nu);
 			bart.setQ(hyper_q);
 		}
 		//once the params are set, now you can set the data
@@ -529,11 +529,9 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 		this.num_gibbs_burn_in = num_gibbs_burn_in;
 	}	
 
-	public void setNumTrees(int num_trees){
-		this.num_trees = num_trees;
-	}
+	public void setNumTrees(int num_trees){ this.num_trees = num_trees; }
 
-	public void setPriorName(char prior_name) {this.prior_name = prior_name;}
+	public void setPriorName(String prior_name) { this.prior_name = prior_name; }
 	
 	public void setSampleVarY(double sample_var_y){
 		this.sample_var_y = sample_var_y;
@@ -569,8 +567,7 @@ public class bartMachineRegressionMultThread extends Classifier implements Seria
 
 	public void setNU(double hyper_nu) {
 		this.hyper_nu = hyper_nu;
-	}	
-	
+	}
 	
 	public void setProbGrow(double prob_grow) {
 		this.prob_grow = prob_grow;

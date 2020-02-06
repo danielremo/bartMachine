@@ -1,6 +1,6 @@
 bartMachine = function(X = NULL, y = NULL, Xy = NULL, 
     num_trees = 50, #found many times to not get better after this value... so let it be the default, it's faster too 
-    prior_name = 'a',
+    prior_name = "poly_splits",
     num_burn_in = 250, 
     num_iterations_after_burn_in = 1000, 
     alpha = 0.95,

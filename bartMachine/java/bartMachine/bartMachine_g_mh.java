@@ -245,29 +245,28 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 		int K = T_i.numLeaves();
 		double p_adj = pAdj(grow_node);
 		int n_adj = grow_node.nAdj();
-		if (prior_name == 'a') {
+		if (prior_name.equalsIgnoreCase("poly_splits")) {
 			return Math.log(alpha)
 					+ 2 * Math.log(1 - alpha / Math.pow(2 + d_eta, beta))
 					- Math.log(Math.pow(1 + d_eta, beta) - alpha)
 					- Math.log(p_adj)
 					- Math.log(n_adj);
-		} else if (prior_name == 'b') {
+		} else if (prior_name.equalsIgnoreCase("exp_splits")) {
 			return 2 * Math.log(1 - Math.pow(Gamma, -d_eta - 1))
 					- Math.log(Math.pow(Gamma, d_eta) - 1)
 					- Math.log(p_adj)
 					- Math.log(n_adj);
-		} else if (prior_name == 'c') {
-			return Math.log(lam)2
+		} else if (prior_name.equalsIgnoreCase("cond_unif")) {
+			return Math.log(lam)
 					-Math.log(4*K-2)
 					- Math.log(p_adj)
 					- Math.log(n_adj);
-		} else if (prior_name == 'd') {
+		} else if (prior_name.equalsIgnoreCase("exponential")) {
 			return -c
 					- Math.log(p_adj)
 					- Math.log(n_adj);
 		} else {
-			System.err.println("Prior not supported")
-			System.exit(0);
+			System.err.println("Prior not supported: only support 1) poly_splits 2) exp_splits 3) cond_unif 4) exponential");
 			return -1;
 		}
 	}
@@ -281,22 +280,21 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 */
 	protected double calcLnTreeStructureRatioPrune(bartMachineTreeNode T_i, bartMachineTreeNode prune_node) {
 		int K = T_i.numLeaves();
-		double p_adj = pAdj(grow_node);
-		int n_adj = grow_node.nAdj();
-		if (prior_name == 'a' || prior_name == 'b') {
-			return -calcLnTreeStructureRatioGrow(T_i, prune_node)
-		} else if (prior_name == 'c') {
+		double p_adj = pAdj(prune_node);
+		int n_adj = prune_node.nAdj();
+		if (prior_name.equalsIgnoreCase("poly_splits") || prior_name.equalsIgnoreCase("exp_splits")) {
+			return -calcLnTreeStructureRatioGrow(T_i, prune_node);
+		} else if (prior_name.equalsIgnoreCase("cond_unif")) {
 			return Math.log(4*K-6)
 					- Math.log(lam)
 					- Math.log(p_adj)
 					- Math.log(n_adj);
-		} else if (prior_name == 'd') {
+		} else if (prior_name.equalsIgnoreCase("exponential")) {
 			return c
 					- Math.log(p_adj)
 					- Math.log(n_adj);
 		} else {
-			System.err.println("Prior not supported")
-			System.exit(0);
+			System.err.println("Prior not supported: only support 1) poly_splits 2) exp_splits 3) cond_unif 4) exponential");
 			return -1;
 		}
 	}
@@ -358,7 +356,6 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	protected double doMHChangeAndCalcLnR(bartMachineTreeNode T_i, bartMachineTreeNode T_star) {
 		bartMachineTreeNode eta_star = pickPruneNodeOrChangeNode(T_star);		
 		bartMachineTreeNode eta_just_for_calculation = eta_star.clone();
-		
 		//now start the growth process
 		//first pick the attribute and then the split and then which way to send the missing data		
 		eta_star.splitAttributeM = pickRandomPredictorThatCanBeAssigned(eta_star);

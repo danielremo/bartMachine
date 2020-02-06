@@ -25,7 +25,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * Performs one Metropolis-Hastings step for one tree
 	 * 
 	 * @param T_i				The original tree to be changed by a proposal step
-	 * @param iteration_name	we just use this when naming the image file of this illustration (debugging only)
+	 * @param "iteration_name"	we just use this when naming the image file of this illustration (debugging only)
 	 * @return 					the next tree (T_{i+1}) via one iteration of M-H which can be the proposal tree (if the step was accepted) or the original tree (if the step was rejected)
 	 */
 	protected bartMachineTreeNode metroHastingsPosteriorTreeSpaceIteration(bartMachineTreeNode T_i, int tree_num, boolean[][] accept_reject_mh, char[][] accept_reject_mh_steps) {
@@ -77,7 +77,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * @param T_i		The root node of the original tree 
 	 * @param T_star	The root node of a copy of the original tree where one node will be grown
 	 * @return			The log Metropolis-Hastings ratio
-	 * @see 			Section A.1 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 			"Section" A.1 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
 	protected double doMHGrowAndCalcLnR(bartMachineTreeNode T_i, bartMachineTreeNode T_star) {
 		//first select a node that can be grown
@@ -111,7 +111,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 		
 		double ln_transition_ratio_grow = calcLnTransRatioGrow(T_i, T_star, grow_node);
 		double ln_likelihood_ratio_grow = calcLnLikRatioGrow(grow_node);
-		double ln_tree_structure_ratio_grow = calcLnTreeStructureRatioGrow(grow_node);
+		double ln_tree_structure_ratio_grow = calcLnTreeStructureRatioGrow(T_i, grow_node);
 		
 		if (DEBUG_MH){
 			System.out.println(gibbs_sample_num + " GROW  <<" + grow_node.stringLocation(true) + ">> ---- X_" + (grow_node.splitAttributeM) + 
@@ -133,7 +133,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * @param T_i		The root node of the original tree 
 	 * @param T_star	The root node of a copy of the original tree where one set of terminal nodes will be pruned
 	 * @return			The log Metropolis-Hastings ratio
-	 * @see 			Section A.2 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 			"Section" A.2 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
 	protected double doMHPruneAndCalcLnR(bartMachineTreeNode T_i, bartMachineTreeNode T_star) {
 		//first select a node that can be pruned
@@ -144,7 +144,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 		}
 		double ln_transition_ratio_prune = calcLnTransRatioPrune(T_i, T_star, prune_node);
 		double ln_likelihood_ratio_prune = -calcLnLikRatioGrow(prune_node); //inverse of before (will speed up later)
-		double ln_tree_structure_ratio_prune = -calcLnTreeStructureRatioGrow(prune_node);
+		double ln_tree_structure_ratio_prune = calcLnTreeStructureRatioPrune(T_i, prune_node);
 		
 		if (DEBUG_MH){
 			System.out.println(gibbs_sample_num + " PRUNE <<" + prune_node.stringLocation(true) + 
@@ -194,7 +194,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * @param T_star				The root node of the proposal tree
 	 * @param node_grown_in_Tstar	The node that was grown in the proposal tree
 	 * @return						The log of the transition ratio
-	 * @see 						Section A.1.1 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 						"Section" A.1.1 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
 	protected double calcLnTransRatioGrow(bartMachineTreeNode T_i, bartMachineTreeNode T_star, bartMachineTreeNode node_grown_in_Tstar) {
 		int b = T_i.numLeaves();
@@ -209,7 +209,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * 
 	 * @param grow_node		The node that was grown in the proposal tree
 	 * @return				The log of the likelihood ratio
-	 * @see 				Section A.1.2 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 				"Section" A.1.2 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
 	protected double calcLnLikRatioGrow(bartMachineTreeNode grow_node) {
 		double sigsq = gibbs_samples_of_sigsq[gibbs_sample_num - 1];
@@ -238,18 +238,59 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * 
 	 * @param grow_node		The node that was grown in the proposal tree
 	 * @return				The log of the transition ratio
-	 * @see 				Section A.1.3 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 				"Section" A.1.3 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
-	protected double calcLnTreeStructureRatioGrow(bartMachineTreeNode grow_node) {
+	protected double calcLnTreeStructureRatioGrow(bartMachineTreeNode T_i, bartMachineTreeNode grow_node) {
 		int d_eta = grow_node.depth;
+		int K = T_i.numLeaves();
 		double p_adj = pAdj(grow_node);
 		int n_adj = grow_node.nAdj();
-		return Math.log(alpha) 
-				+ 2 * Math.log(1 - alpha / Math.pow(2 + d_eta, beta))
-				- Math.log(Math.pow(1 + d_eta, beta) - alpha)
-				- Math.log(p_adj) 
-				- Math.log(n_adj);
-	}	
+		if (prior_name.equalsIgnoreCase("poly_splits")) {
+			return Math.log(alpha)
+					+ 2 * Math.log(1 - alpha / Math.pow(2 + d_eta, beta))
+					- Math.log(Math.pow(1 + d_eta, beta) - alpha)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name.equalsIgnoreCase("exp_splits")) {
+			return 2 * Math.log(1 - Math.pow(Gamma, -d_eta - 1))
+					- Math.log(Math.pow(Gamma, d_eta) - 1)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name.equalsIgnoreCase("cond_unif")) {
+			return Math.log(lam)
+					-Math.log(4*K-2)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name.equalsIgnoreCase("exponential")) {
+			return -c
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else {
+			System.err.println("Prior not supported: only support 1) poly_splits 2) exp_splits 3) cond_unif 4) exponential");
+			return -1;
+		}
+	}
+
+	protected double calcLnTreeStructureRatioPrune(bartMachineTreeNode T_i, bartMachineTreeNode prune_node) {
+		int K = T_i.numLeaves();
+		double p_adj = pAdj(prune_node);
+		int n_adj = prune_node.nAdj();
+		if (prior_name.equalsIgnoreCase("poly_splits") || prior_name.equalsIgnoreCase("exp_splits")) {
+			return -calcLnTreeStructureRatioGrow(T_i, prune_node);
+		} else if (prior_name.equalsIgnoreCase("cond_unif")) {
+			return Math.log(4*K-6)
+					- Math.log(lam)
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else if (prior_name.equalsIgnoreCase("exponential")) {
+			return c
+					- Math.log(p_adj)
+					- Math.log(n_adj);
+		} else {
+			System.err.println("Prior not supported: only support 1) poly_splits 2) exp_splits 3) cond_unif 4) exponential");
+			return -1;
+		}
+	}
 	
 	/**
 	 * This calculates the log transition ratio for the prune step.
@@ -258,14 +299,14 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * @param T_star		The root node of the proposal tree
 	 * @param prune_node	The node that was pruned
 	 * @return				The log transition ratio
-	 * @see 				Section A.2.1 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 				"Section" A.2.1 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
 	protected double calcLnTransRatioPrune(bartMachineTreeNode T_i, bartMachineTreeNode T_star, bartMachineTreeNode prune_node) {
 		int w_2 = T_i.numPruneNodesAvailable();
 		int b = T_i.numLeaves();
 		double p_adj = pAdj(prune_node);
 		int n_adj = prune_node.nAdj();
-		return Math.log(w_2) - Math.log(b - 1) - Math.log(p_adj) - Math.log(n_adj); 
+		return Math.log(w_2) - Math.log(b - 1) - Math.log(p_adj) - Math.log(n_adj);
 	}
 
 	/**
@@ -303,7 +344,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * @param T_i		The root node of the original tree 
 	 * @param T_star	The root node of a copy of the original tree where one node will be changed
 	 * @return			The log Metropolis-Hastings ratio
-	 * @see 			Section A.3 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 			"Section" A.3 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
 	protected double doMHChangeAndCalcLnR(bartMachineTreeNode T_i, bartMachineTreeNode T_star) {
 		bartMachineTreeNode eta_star = pickPruneNodeOrChangeNode(T_star);		
@@ -343,7 +384,7 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 	 * @param eta		The node in the original tree that was targeted for a change in the splitting rule
 	 * @param eta_star	The same node but now with a different splitting rule
 	 * @return			The log likelihood ratio
-	 * @see 			Section A.3.2 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
+	 * @see 			"Section" A.3.2 of Kapelner, A and Bleich, J. bartMachine: A Powerful Tool for Machine Learning in R. ArXiv e-prints, 2013
 	 */
 	private double calcLnLikRatioChange(bartMachineTreeNode eta, bartMachineTreeNode eta_star) {
 		int n_1_star = eta_star.left.n_eta;

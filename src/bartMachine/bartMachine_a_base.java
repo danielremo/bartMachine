@@ -25,6 +25,8 @@ public abstract class bartMachine_a_base extends Classifier implements Serializa
 
 	/** the number of trees in our sum-of-trees model */
 	protected int num_trees;
+	/** the prior to use */
+	protected String prior_name;
 	/** how many Gibbs samples we burn-in for */
 	protected int num_gibbs_burn_in;
 	/** how many total Gibbs samples in a BART model creation */
@@ -81,4 +83,7 @@ public abstract class bartMachine_a_base extends Classifier implements Serializa
 	public void setNumTrees(int m){
 		this.num_trees = m;
 	}
+
+	public void setPriorName(String s) { this.prior_name = s; }
+
 }
