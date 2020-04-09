@@ -267,7 +267,6 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 					- Math.log(n_adj);
 		} else {
 			System.err.println("Prior not supported: only support 1) poly_splits 2) exp_splits 3) cond_unif 4) exponential");
-			return -1;
 		}
 	}
 
@@ -295,7 +294,6 @@ public abstract class bartMachine_g_mh extends bartMachine_f_gibbs_internal impl
 					- Math.log(n_adj);
 		} else {
 			System.err.println("Prior not supported: only support 1) poly_splits 2) exp_splits 3) cond_unif 4) exponential");
-			return -1;
 		}
 	}
 
